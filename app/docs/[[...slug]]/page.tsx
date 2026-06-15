@@ -1,4 +1,6 @@
+import { OpenAPIPage } from '@/components/api-page';
 import { getMDXComponents } from '@/components/mdx';
+import { openapi } from '@/lib/openapi';
 import { source } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page';
 import type { Metadata } from 'next';
@@ -21,7 +23,16 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={getMDXComponents()} />
+        <MDX
+          components={getMDXComponents({
+            OpenAPIPage: async (componentProps) => (
+              <OpenAPIPage
+                {...(await openapi.preloadOpenAPIPage(page))}
+                {...componentProps}
+              />
+            ),
+          })}
+        />
       </DocsBody>
     </DocsPage>
   );

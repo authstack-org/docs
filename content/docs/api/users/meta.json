@@ -1,0 +1,8 @@
+{
+  "title": "Users",
+  "description": "Application-scoped users.",
+  "pages": [
+    "get-list-all-users-in-this-application",
+    "get-get-a-user-by-id"
+  ]
+}

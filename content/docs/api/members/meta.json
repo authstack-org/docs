@@ -1,0 +1,9 @@
+{
+  "title": "Members",
+  "description": "Organization membership.",
+  "pages": [
+    "get-list-members-of-an-organization",
+    "post-add-a-user-to-an-organization",
+    "delete-remove-a-user-from-an-organization"
+  ]
+}

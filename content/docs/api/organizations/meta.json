@@ -1,0 +1,9 @@
+{
+  "title": "Organizations",
+  "description": "Application-scoped organizations.",
+  "pages": [
+    "get-list-all-organizations-in-this-application",
+    "post-create-a-team-organization",
+    "get-get-an-organization-by-id"
+  ]
+}

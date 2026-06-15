@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "openapi:generate": "bun ./scripts/generate-openapi-docs.ts",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
@@ -12,6 +13,7 @@
     "@types/mdx": "2.0.14",
     "fumadocs-core": "16.10.1",
     "fumadocs-mdx": "15.0.12",
+    "fumadocs-openapi": "^11.0.2",
     "fumadocs-ui": "16.10.1",
     "next": "16.2.9",
     "react": "19.2.7",

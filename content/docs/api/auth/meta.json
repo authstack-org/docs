@@ -1,0 +1,11 @@
+{
+  "title": "Auth",
+  "description": "End-user authentication endpoints.",
+  "pages": [
+    "post-authenticate-a-user-and-return-access-and-refresh-tokens",
+    "post-revoke-a-refresh-token",
+    "post-rotate-a-refresh-token-and-return-a-new-token-pair",
+    "post-create-a-user-and-personal-organization",
+    "post-issue-a-token-pair-for-another-organization"
+  ]
+}

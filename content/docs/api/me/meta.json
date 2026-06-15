@@ -1,0 +1,7 @@
+{
+  "title": "Me",
+  "description": "Current user endpoints.",
+  "pages": [
+    "get-list-organizations-the-current-user-belongs-to"
+  ]
+}
