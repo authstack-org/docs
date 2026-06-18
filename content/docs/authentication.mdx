@@ -15,16 +15,17 @@ The `app_id` and `client_secret` are returned when an admin creates an applicati
 
 ## Admin authentication
 
-Authstack ships with a browser-based admin panel at `/admin/login`.
+Authstack ships with a browser-based admin panel at `/admin/login` for **instance operators** only. Tenant end users never use the admin panel.
 
-The first admin account is bootstrapped with `AUTHSTACK_ADMIN_KEY`:
+The first instance admin is created with the CLI on a fresh database:
 
 ```bash
-curl -X POST http://localhost:8080/admin/users \
-  -H "Content-Type: application/json" \
-  -H "X-Admin-Key: <AUTHSTACK_ADMIN_KEY>" \
-  -d '{"email": "admin@example.com", "password": "your-password"}'
+AUTHSTACK_BOOTSTRAP_EMAIL=admin@example.com \
+AUTHSTACK_BOOTSTRAP_PASSWORD='your-strong-password' \
+  authstack bootstrap-admin
 ```
+
+With Docker Compose, set `AUTHSTACK_BOOTSTRAP_EMAIL` and `AUTHSTACK_BOOTSTRAP_PASSWORD` in your environment before `make up`. The container entrypoint runs bootstrap automatically when no admin exists.
 
 After the first admin exists, log in through:
 

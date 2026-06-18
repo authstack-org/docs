@@ -247,82 +247,6 @@
         }
       }
     },
-    "/admin/users": {
-      "post": {
-        "tags": [
-          "Admin"
-        ],
-        "summary": "Create the first admin user",
-        "operationId": "admin_create_user",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAdminUserRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Admin user created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAdminUserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "adminKey": []
-          }
-        ]
-      }
-    },
     "/auth/login": {
       "post": {
         "tags": [
@@ -849,38 +773,6 @@
           }
         }
       },
-      "CreateAdminUserRequest": {
-        "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "password": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateAdminUserResponse": {
-        "type": "object",
-        "required": [
-          "id",
-          "email"
-        ],
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "id": {
-            "type": "string"
-          }
-        }
-      },
       "CreateAppForm": {
         "type": "object",
         "required": [
@@ -1277,11 +1169,6 @@
         "in": "cookie",
         "name": "admin_token"
       },
-      "adminKey": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-Admin-Key"
-      },
       "appBasicAuth": {
         "type": "http",
         "scheme": "basic"
@@ -1296,7 +1183,7 @@
   "tags": [
     {
       "name": "Admin",
-      "description": "Admin panel and bootstrap endpoints."
+      "description": "Admin panel endpoints."
     },
     {
       "name": "Auth",

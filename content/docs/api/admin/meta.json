@@ -1,6 +1,6 @@
 {
   "title": "Admin",
-  "description": "Admin panel and bootstrap endpoints.",
+  "description": "Admin panel endpoints.",
   "pages": [
     "post-create-an-application",
     "post-create-an-application-from-the-admin-form",
@@ -8,7 +8,6 @@
     "get-render-admin-dashboard",
     "get-render-admin-login-page",
     "post-submit-admin-login-form",
-    "post-clear-the-admin-session-cookie",
-    "post-create-the-first-admin-user"
+    "post-clear-the-admin-session-cookie"
   ]
 }

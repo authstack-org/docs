@@ -53,4 +53,4 @@ All entity IDs are TypeIDs: prefixed, sortable identifiers.
 - JWTs are signed with ES256. Only Authstack holds the private key.
 - Refresh tokens rotate on every use.
 - The admin panel uses signed JWTs stored in `HttpOnly; SameSite=Strict` cookies.
-- `X-Admin-Key` is only used to bootstrap the first admin account.
+- The first instance admin is created with `authstack bootstrap-admin` (CLI only).

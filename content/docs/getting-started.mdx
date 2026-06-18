@@ -19,13 +19,16 @@ make keys
 # 2. Copy the output into a .env file
 cp .env.example .env
 # Edit .env and paste in JWT_PRIVATE_KEY and JWT_PUBLIC_KEY
+# Set AUTHSTACK_BOOTSTRAP_EMAIL and AUTHSTACK_BOOTSTRAP_PASSWORD for the first admin
 
 # 3. Start the database and API
 make up
 make logs
 ```
 
-The API is available at `http://localhost:8080` once `make up` completes.
+The API is available at `http://localhost:8080` once `make up` completes. On a fresh database, the API container creates the first instance admin automatically from your bootstrap environment variables.
+
+Log in at `http://localhost:8080/admin/login` with those credentials.
 
 ## Key generation
 
@@ -46,6 +49,24 @@ The values are base64-encoded PEM files on a single line. They can be pasted dir
 
 Keep `JWT_PRIVATE_KEY` secret. `JWT_PUBLIC_KEY` can be shared with services that verify tokens locally or via `GET /.well-known/jwks.json`.
 
+## Bootstrap the first instance admin
+
+Docker Compose runs `authstack bootstrap-admin` on startup when `AUTHSTACK_BOOTSTRAP_EMAIL` is set and the database has no admins.
+
+For a manual one-off bootstrap:
+
+```bash
+make bootstrap EMAIL=admin@example.com PASSWORD=your-strong-password
+```
+
+Or without Docker:
+
+```bash
+AUTHSTACK_BOOTSTRAP_EMAIL=admin@example.com \
+AUTHSTACK_BOOTSTRAP_PASSWORD='your-strong-password' \
+  cargo run -- bootstrap-admin
+```
+
 ## Make commands
 
 | Command | Description |
@@ -53,6 +74,7 @@ Keep `JWT_PRIVATE_KEY` secret. `JWT_PUBLIC_KEY` can be shared with services that
 | `make up` | Build images and start DB + API in the background. |
 | `make down` | Stop containers and keep the DB volume. |
 | `make clean` | Stop containers and wipe the DB volume. |
+| `make bootstrap` | Create the first instance admin via CLI (fresh database only). |
 | `make test` | Run tests against already-running containers. |
 | `make test-clean` | Full isolated test run: wipe, start, test, teardown. |
 | `make logs` | Tail API logs. |
@@ -80,7 +102,11 @@ Requires Rust stable and a running PostgreSQL instance.
 
 ```bash
 cp .env.example .env
-# Fill in DATABASE_URL, JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, and AUTHSTACK_ADMIN_KEY
+# Fill in DATABASE_URL, JWT_PRIVATE_KEY, JWT_PUBLIC_KEY
+
+AUTHSTACK_BOOTSTRAP_EMAIL=admin@example.com \
+AUTHSTACK_BOOTSTRAP_PASSWORD='your-password' \
+  cargo run -- bootstrap-admin
 
 cargo run
 cargo check
