@@ -5,6 +5,8 @@ description: Manage applications, operators, tenant users, and organizations thr
 
 The admin panel at `/admin/login` is for **Authstack instance operators** only. Tenant end users never use this UI.
 
+Operator accounts live in the `admin` schema; tenant users and organizations live in the `tenant` schema. See [Directories](/docs/directories#database-layout) for how identity is partitioned.
+
 The UI is server-rendered with **Askama**, styled with **Tailwind CSS** and **shadcn** design tokens, and enhanced with **Datastar** for live search and inline interactions.
 
 ## Operator roles

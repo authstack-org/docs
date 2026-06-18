@@ -5,6 +5,8 @@ description: Personal vs team organizations in Authstack and when to use each.
 
 Authstack models every tenant user inside **organizations**. There are two types: **personal** and **team**.
 
+Organizations live in a **directory** (see [Directories & deployment topologies](/docs/directories)). In **application silo** mode, team orgs are scoped to one application. In **shared directory** mode, team orgs can span the directory and be shared across apps via grants.
+
 ## Personal organizations
 
 A **personal org** is a private workspace for a single user.
@@ -55,6 +57,7 @@ curl -u "$APP_ID:$APP_SECRET" \
 
 ## Related
 
+- [Directories & deployment topologies](/docs/directories) — identity policies and typical setups
 - [Organization invites](/docs/invites) — shareable links for team orgs only
 - [Admin panel — Organizations](/docs/admin-panel#organizations)
 - [Members API](/docs/api/members)

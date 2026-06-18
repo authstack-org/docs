@@ -6,6 +6,7 @@
     "configuration",
     "authentication",
     "admin-panel",
+    "directories",
     "organizations",
     "invites",
     "api",
