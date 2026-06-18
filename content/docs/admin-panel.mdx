@@ -26,7 +26,8 @@ All operators with access to an application can open its detail page to:
 
 - View app metadata and user count
 - Open **Users** to list tenant users (with live search)
-- **Add user** to provision a tenant account (name, email, password)
+- **Invite user** to generate a shareable link (user sets their own password)
+- **Add user** to provision a tenant account directly (name, email, password)
 - Open **Organizations** to browse orgs and manage members
 
 Instance admins can also delete an application from the app detail page. This removes all tenant data for that application.
@@ -36,11 +37,17 @@ Instance admins can also delete an application from the app detail page. This re
 From an application's **Organizations** page you can:
 
 - List all organizations (personal orgs created at signup and team orgs)
+- **Create a team organization** (name + slug) for shared workspaces
 - Open an organization to view members
-- Add an existing tenant user as a member (with role)
+- For **team** orgs only: **Invite by email** — create a shareable invite link (no email is sent automatically)
+- For **team** orgs only: add an existing tenant user as a member (with role)
 - Remove a member from the organization
 
-For programmatic org/member management from your BFF, use the [Members API](/docs/api/members).
+Personal organizations cannot receive invites. See [Organizations](/docs/organizations) for when to use personal vs team orgs.
+
+See [Organization invites](/docs/invites) for the full invite flow and API.
+
+For programmatic org/member management from your BFF, use the [Members API](/docs/api/members) and [Invites API](/docs/api/invites).
 
 ## UI development
 

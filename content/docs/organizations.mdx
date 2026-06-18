@@ -1,0 +1,60 @@
+---
+title: Organizations
+description: Personal vs team organizations in Authstack and when to use each.
+---
+
+Authstack models every tenant user inside **organizations**. There are two types: **personal** and **team**.
+
+## Personal organizations
+
+A **personal org** is a private workspace for a single user.
+
+- Created **automatically** when a user signs up (or when an operator provisions a user in the admin panel).
+- Exactly **one personal org per user** in an application.
+- The user is the **owner** of their personal org.
+- Intended for individual settings, private resources, and default tenancy — not for inviting colleagues.
+
+Personal orgs appear in the admin **Organizations** list with type `personal`. You cannot create invites or add members to personal orgs.
+
+## Team organizations
+
+A **team org** is a shared workspace for collaboration.
+
+- Created explicitly via the [app API](/docs/api/orgs#create-organization) (`POST /orgs`) or from the admin panel (**Organizations → New team organization**).
+- Multiple users can be **members** with roles (`owner`, `admin`, `member`).
+- Use team orgs when you need shared access, project boundaries, or **organization invites**.
+
+## When to use which
+
+| Scenario | Use |
+| --- | --- |
+| User signs up and needs a default workspace | Personal org (automatic) |
+| Shared project, company account, or department | Team org |
+| Inviting a colleague with a shareable link | Team org only |
+| Adding an existing user as a member from the admin panel | Team org only |
+
+A user who accepts a team invite still receives their own personal org (same as signup). They become a member of the invited team org **in addition** to their personal workspace.
+
+## Creating a team organization
+
+### Admin panel
+
+1. Open **Applications → your app → Organizations**.
+2. Click **New team organization**.
+3. Enter a display name and slug (lowercase letters, numbers, hyphens).
+4. Open the new org to invite members or add existing users.
+
+### App API
+
+```bash
+curl -u "$APP_ID:$APP_SECRET" \
+  -X POST "http://localhost:8080/orgs" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Engineering", "slug": "engineering"}'
+```
+
+## Related
+
+- [Organization invites](/docs/invites) — shareable links for team orgs only
+- [Admin panel — Organizations](/docs/admin-panel#organizations)
+- [Members API](/docs/api/members)

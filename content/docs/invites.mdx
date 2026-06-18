@@ -1,0 +1,112 @@
+---
+title: Organization Invites
+description: Invite users to organizations with shareable links and a public accept page.
+---
+
+Organization invites let you add people to a **team organization** without creating their account upfront. Invites are **not** available for personal organizations. See [Organizations](/docs/organizations) for the difference.
+
+Authstack returns an **invite URL** you share yourself — email delivery is not built in yet.
+
+## How it works
+
+1. An operator or your BFF creates an invite for an email address and organization.
+2. Authstack returns `invite_url` (and `token`) in the API response.
+3. The invited person opens the link and sets a password on the accept page.
+4. Authstack creates their user account (if needed), adds them to the organization, and marks the invite accepted.
+
+If the email already belongs to a user in the application, they must enter their **existing password** to accept.
+
+## Create an invite (BFF / app API)
+
+Use application credentials (`app_id` + `client_secret`):
+
+```bash
+curl -u "$APP_ID:$APP_SECRET" \
+  -X POST "http://localhost:8080/orgs/$ORG_ID/invites" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "colleague@example.com",
+    "role": "member",
+    "name": "Alex"
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "inv_01...",
+  "token": "abc123...",
+  "invite_url": "http://localhost:8080/invite/abc123...",
+  "email": "colleague@example.com",
+  "organization_id": "org_01...",
+  "role": "member",
+  "expires_at": "2026-06-25T12:00:00Z"
+}
+```
+
+Copy `invite_url` into your product UI, support chat, or email system.
+
+### TypeScript SDK
+
+```ts
+const { data } = await client.api.invites.create({
+  path: { org_id: orgId },
+  body: {
+    email: "colleague@example.com",
+    role: "member",
+    name: "Alex",
+  },
+});
+
+console.log(data?.invite_url);
+```
+
+List pending invites:
+
+```ts
+await client.api.invites.list({ path: { org_id: orgId } });
+```
+
+## Accept page (end user)
+
+Open the invite URL in a browser:
+
+```
+GET /invite/{token}
+```
+
+The page shows the organization name, locked email field, name, and password fields. Submitting the form runs:
+
+```
+POST /invite/{token}/accept
+```
+
+For custom UIs, accept programmatically (no app credentials required):
+
+```bash
+curl -X POST "http://localhost:8080/invites/$TOKEN/accept" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alex", "password": "secure-password"}'
+```
+
+## Admin panel
+
+From **Applications → Organization → Invite by email**, operators can create invites and copy the link from the success banner or pending-invites list.
+
+## Configuration
+
+Set `PUBLIC_BASE_URL` in production so invite links point at your Authstack host:
+
+```txt
+PUBLIC_BASE_URL=https://auth.yourcompany.com
+```
+
+Optional: `INVITE_EXPIRY_SECS` (default 7 days).
+
+## Notes
+
+- Invites are scoped to one **team** organization and role. Personal orgs reject invite creation.
+- Creating a new invite for the same email + organization revokes any previous **pending** invite.
+- Accepted invites cannot be reused.
+- New users still receive a personal organization (same as signup) in addition to the invited team membership.

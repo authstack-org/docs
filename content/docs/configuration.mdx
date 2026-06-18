@@ -15,6 +15,8 @@ Authstack is configured with environment variables.
 | `ACCESS_TOKEN_EXPIRY_SECS` | No | Access token lifetime in seconds. Defaults to `900`. |
 | `REFRESH_TOKEN_EXPIRY_SECS` | No | Refresh token lifetime in seconds. Defaults to `2592000`. |
 | `PORT` | No | HTTP port. Defaults to `8080`. |
+| `PUBLIC_BASE_URL` | No | Base URL used in invite links (no trailing slash). Defaults to `http://localhost:8080`. |
+| `INVITE_EXPIRY_SECS` | No | Invite link lifetime in seconds. Defaults to `604800` (7 days). |
 | `RUST_LOG` | No | Rust log filter, for example `authstack=debug` or `authstack=info`. |
 
 ## Bootstrap (first instance admin)

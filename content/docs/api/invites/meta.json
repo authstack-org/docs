@@ -1,0 +1,9 @@
+{
+  "title": "Invites",
+  "description": "Organization invite links.",
+  "pages": [
+    "post-accept-an-invite-and-set-a-password",
+    "get-list-pending-organization-invites",
+    "post-create-an-organization-invite-link"
+  ]
+}
