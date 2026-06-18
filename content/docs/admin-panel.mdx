@@ -14,11 +14,27 @@ The UI is server-rendered with **Askama**, styled with **Tailwind CSS** and **sh
 | Role | Access |
 | --- | --- |
 | **Instance admin** | Full instance access: all applications, operator management, application deletion |
-| **App admin** | Scoped to assigned applications: view app details, list users, create tenant users, manage organizations |
+| **Directory admin** | Scoped to assigned directories via `admin_directory_grant`: all apps in those directories, can create apps/operators within scope |
+| **App admin** | Scoped to assigned applications via `admin_app_grant`: view app details, list users, create tenant users, manage organizations |
 
 The first instance admin is created with [`authstack bootstrap-admin`](/docs/getting-started#bootstrap-the-first-instance-admin).
 
-Additional operators are created by an instance admin from **Operators → Add operator**.
+Additional operators are created by an instance admin or directory admin from **Operators → Add operator**.
+
+- **Instance admin** can create any role and assign any directory or application.
+- **Directory admin** can create **app admin** or **directory admin** operators only, with grants limited to directories they control (applications must belong to those directories).
+
+## Directories
+
+Instance admins can manage identity boundaries from **Directories**:
+
+- List all directories (name, slug, policy, application count, admin count)
+- Open a directory to view its metadata and **directory administrators**
+- **Add directory admin** from a directory's detail page (email + password) — grants `directory_admin` for that directory only
+- **New directory** — set display name, slug, and identity policy (`application_silo` or `shared_directory`)
+- When creating an application, choose which directory it belongs to (defaults to `default`)
+
+Directory admins see only directories they are granted in **Directories**. They can open those directories and add more directory admins (or use **Operators → Add operator**), but cannot create new directories.
 
 ## Applications
 

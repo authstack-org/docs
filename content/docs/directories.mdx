@@ -34,7 +34,9 @@ Instance (single Authstack deployment)
 - **User app grant** — Links a user to an application they may sign in to. Created automatically on signup for that app; in shared-directory mode, grants can be added when a user first uses another app.
 - **Scoped application** — For `application_silo` users, `scoped_application_id` pins the user to one app (same email can exist as different users in different apps). For `shared_directory`, this is `NULL` — one identity per email in the directory.
 
-Fresh installs seed a **default directory** (`slug: default`, policy `application_silo`). New applications are attached to it automatically unless you add multi-directory support later.
+Fresh installs seed a **default directory** (`slug: default`, policy `application_silo`). New applications are attached to it automatically unless you pick another directory when creating the app.
+
+Instance admins can create additional directories from the admin panel (**Directories → New directory**) or by inserting into `tenant.directory` directly during development.
 
 ## Typical case 1: Startup / Clerk-like (default)
 
@@ -77,7 +79,7 @@ Same person signs in once conceptually; access to each app is gated by grants. T
 | Directories | Many (e.g. `acme`, `globex`) |
 | Policy | Per directory (`application_silo` or `shared_directory`) |
 | Applications | Each app linked to one directory |
-| Operators | Instance admins see all; app admins scoped by `admin_app_grant` |
+| Operators | Instance admins see all; directory admins see scoped operators in their directories; app admins have no access |
 
 Use this when you host Authstack for several companies or environments and need hard identity separation at the directory level. The default install uses a single hidden directory so simple setups never see this complexity.
 
