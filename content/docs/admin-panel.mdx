@@ -1,16 +1,18 @@
 ---
 title: Admin Panel
-description: Manage applications, operators, and tenant users through the instance admin UI.
+description: Manage applications, operators, tenant users, and organizations through the instance admin UI.
 ---
 
 The admin panel at `/admin/login` is for **Authstack instance operators** only. Tenant end users never use this UI.
+
+The UI is server-rendered with **Askama**, styled with **Tailwind CSS** and **shadcn** design tokens, and enhanced with **Datastar** for live search and inline interactions.
 
 ## Operator roles
 
 | Role | Access |
 | --- | --- |
 | **Instance admin** | Full instance access: all applications, operator management, application deletion |
-| **App admin** | Scoped to assigned applications: view app details, list users, create tenant users |
+| **App admin** | Scoped to assigned applications: view app details, list users, create tenant users, manage organizations |
 
 The first instance admin is created with [`authstack bootstrap-admin`](/docs/getting-started#bootstrap-the-first-instance-admin).
 
@@ -23,16 +25,33 @@ From the dashboard, instance admins can create applications and view one-time `c
 All operators with access to an application can open its detail page to:
 
 - View app metadata and user count
-- Open **Manage users** to list tenant users
+- Open **Users** to list tenant users (with live search)
 - **Add user** to provision a tenant account (name, email, password)
+- Open **Organizations** to browse orgs and manage members
 
 Instance admins can also delete an application from the app detail page. This removes all tenant data for that application.
 
-## What the admin panel is not
+## Organizations
 
-- Not a login portal for tenant end users
-- Not a replacement for your product's team-management UI
-- Not org/role management for tenants (use the [Members API](/docs/api/members) from your BFF for that)
+From an application's **Organizations** page you can:
+
+- List all organizations (personal orgs created at signup and team orgs)
+- Open an organization to view members
+- Add an existing tenant user as a member (with role)
+- Remove a member from the organization
+
+For programmatic org/member management from your BFF, use the [Members API](/docs/api/members).
+
+## UI development
+
+Admin styles are built from `static/css/admin.input.css` with Tailwind v4:
+
+```bash
+cd authstack
+make css
+```
+
+Static assets are served at `/static`. The Docker image builds CSS in a Node stage before compiling the Rust binary.
 
 ## JSON API
 
