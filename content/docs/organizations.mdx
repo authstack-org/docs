@@ -1,63 +1,49 @@
 ---
 title: Organizations
-description: Personal vs team organizations in Authstack and when to use each.
+description: App-scoped organizations for tenants, teams, and collaboration in Authstack.
 ---
 
-Authstack models every tenant user inside **organizations**. There are two types: **personal** and **team**.
+Authstack **organizations** are **scoped to a single application**. They are how your app models tenants, teams, or shared workspaces. Authstack does not create an organization automatically when a user signs up.
 
-Organizations live in a **directory** (see [Directories & deployment topologies](/docs/directories)). In **application silo** mode, team orgs are scoped to one application. In **shared directory** mode, team orgs can span the directory and be shared across apps via grants.
+For per-user private data, use the user's id (`sub` in the JWT) directly in your application — you do not need a personal organization wrapper.
 
-## Personal organizations
+## Directory vs organization
 
-A **personal org** is a private workspace for a single user.
+| Layer | Scope | Purpose |
+| --- | --- | --- |
+| **Directory** | Authstack identity realm | One email = one user across apps in that directory |
+| **Organization** | Single application | Tenant boundary, team, or workspace **inside that app** |
 
-- Created **automatically** when a user signs up (or when an operator provisions a user in the admin panel).
-- Exactly **one personal org per user** in an application.
-- The user is the **owner** of their personal org.
-- Intended for individual settings, private resources, and default tenancy — not for inviting colleagues.
+The same person (`alice@acme.com`) in one directory can belong to different organizations in App A and App B. Those org graphs are independent.
 
-Personal orgs appear in the admin **Organizations** list with type `personal`. You cannot create invites or add members to personal orgs.
+## Creating organizations
 
-## Team organizations
+Create an organization via the API (`POST /orgs`) or from the admin panel (**Organizations → New organization**). Slugs are unique **per application**.
 
-A **team org** is a shared workspace for collaboration.
+Users must already have a `user_app_grant` for the application before they can be added as members (signup, invite accept, or admin provisioning).
 
-- Created explicitly via the [app API](/docs/api/orgs#create-organization) (`POST /orgs`) or from the admin panel (**Organizations → New team organization**).
-- Multiple users can be **members** with roles (`owner`, `admin`, `member`).
-- Use team orgs when you need shared access, project boundaries, or **organization invites**.
+## Members and roles
 
-## When to use which
+- Add members with `POST /orgs/{id}/members` or from the admin organization detail page.
+- Member `role` is a string defined by your app (`owner`, `admin`, `member`, etc.).
+- Organization invites add users to a specific org; see [Organization invites](/docs/invites).
 
-| Scenario | Use |
+## JWT and org context
+
+Access tokens include `org_id` and `role` **only when** the user has an active organization membership for the issuing application. After signup or login with no org memberships, the token carries user identity (`sub`, `email`, `app_id`, `directory_id`) without org claims.
+
+Use `POST /auth/switch-org` to issue a new token pair for a different organization the user belongs to. Use `POST /auth/refresh` with an optional `org_id` to rotate tokens while selecting org context.
+
+## Typical patterns
+
+| Your product | How to use organizations |
 | --- | --- |
-| User signs up and needs a default workspace | Personal org (automatic) |
-| Shared project, company account, or department | Team org |
-| Inviting a colleague with a shareable link | Team org only |
-| Adding an existing user as a member from the admin panel | Team org only |
-
-A user who accepts a team invite still receives their own personal org (same as signup). They become a member of the invited team org **in addition** to their personal workspace.
-
-## Creating a team organization
-
-### Admin panel
-
-1. Open **Applications → your app → Organizations**.
-2. Click **New team organization**.
-3. Enter a display name and slug (lowercase letters, numbers, hyphens).
-4. Open the new org to invite members or add existing users.
-
-### App API
-
-```bash
-curl -u "$APP_ID:$APP_SECRET" \
-  -X POST "http://localhost:8080/orgs" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Engineering", "slug": "engineering"}'
-```
+| B2B SaaS (one app) | One org per customer; all users are members |
+| Multi-app suite | Same directory user; separate org memberships per app |
+| Solo / B2C | Skip orgs; key resources by `user_id` |
 
 ## Related
 
-- [Directories & deployment topologies](/docs/directories) — identity policies and typical setups
-- [Organization invites](/docs/invites) — shareable links for team orgs only
-- [Admin panel — Organizations](/docs/admin-panel#organizations)
-- [Members API](/docs/api/members)
+- [Directories](/docs/directories) — identity boundaries and app grants
+- [Authentication](/docs/authentication) — signup, login, tokens
+- [Organization invites](/docs/invites) — shareable invite links

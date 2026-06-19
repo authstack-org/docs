@@ -30,7 +30,7 @@ The API is available at `http://localhost:8080` once `make up` completes. On a f
 
 Log in at `http://localhost:8080/admin/login` with those credentials.
 
-On a fresh database, migrations create the `admin` and `tenant` schemas, seed a default directory (`application_silo`), and attach new applications to it. See [Directories & deployment topologies](/docs/directories) for typical setups.
+On a fresh database, migrations create the `admin` and `tenant` schemas, seed a default directory, and attach new applications to it. Users in the same directory share one identity; use separate directories when apps must not share users. See [Directories & deployment topologies](/docs/directories) for typical setups.
 
 ## Key generation
 

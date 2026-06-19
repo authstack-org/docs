@@ -3,7 +3,7 @@ title: Organization Invites
 description: Invite users to organizations with shareable links and a public accept page.
 ---
 
-Organization invites let you add people to a **team organization** without creating their account upfront. Invites are **not** available for personal organizations. See [Organizations](/docs/organizations) for the difference.
+Organization invites let you add people to an **organization** without creating their account upfront. See [Organizations](/docs/organizations) for how orgs relate to directories and users.
 
 Authstack returns an **invite URL** you share yourself — email delivery is not built in yet.
 
@@ -109,4 +109,4 @@ Optional: `INVITE_EXPIRY_SECS` (default 7 days).
 - Invites are scoped to one **team** organization and role. Personal orgs reject invite creation.
 - Creating a new invite for the same email + organization revokes any previous **pending** invite.
 - Accepted invites cannot be reused.
-- New users still receive a personal organization (same as signup) in addition to the invited team membership.
+- New users are added to the invited organization and receive an app grant; no organization is created beyond the invite target.

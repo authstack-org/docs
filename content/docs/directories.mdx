@@ -3,7 +3,7 @@ title: Directories & deployment topologies
 description: How Authstack scopes identity with directories, grants, and two database schemas.
 ---
 
-Authstack separates **platform operators** from **tenant identity**. Operators use the admin panel; end users authenticate through your applications. Tenant data is grouped under **directories** — the boundary that decides whether users are isolated per app or shared across apps.
+Authstack separates **platform operators** from **tenant identity**. Operators use the admin panel; end users authenticate through your applications. Tenant data is grouped under **directories** — the identity boundary for users, organizations, and application access.
 
 ## Database layout
 
@@ -11,7 +11,7 @@ PostgreSQL data is split into two schemas:
 
 | Schema | Purpose | Examples |
 | --- | --- | --- |
-| **`admin`** | Instance operators and their app access | `admin_user`, `admin_app_grant` |
+| **`admin`** | Instance operators and their app access | `admin_user`, `admin_app_grant`, `admin_directory_grant` |
 | **`tenant`** | Directories, applications, users, orgs, grants | `directory`, `application`, `user`, `organization`, `user_app_grant` |
 
 Application code sets `search_path` to `tenant, admin, public` so queries can use unqualified table names. Migrations always run against the default path so migration history stays in `public._sqlx_migrations`.
@@ -21,67 +21,62 @@ Application code sets `search_path` to `tenant, admin, public` so queries can us
 ```
 Instance (single Authstack deployment)
 └── Directory                    ← identity boundary
-    ├── identity_policy          application_silo | shared_directory
     ├── Applications             client_id + secret per app
-    ├── Users                    belong to the directory
-    │   └── user_app_grant       which apps a user may access
-    └── Organizations            personal or team workspaces
+    ├── Users                    one identity per email in the directory
+    │   └── user_app_grant       which apps a user may sign in to
+    └── Organizations            app-scoped tenants and teams (optional)
 ```
 
-- **Directory** — A tenant identity realm (company, customer, or logical partition). Every application belongs to exactly one directory.
-- **Identity policy** — Controls how users and organizations relate to applications (see below).
+- **Directory** — A tenant identity realm (company, customer, or logical partition). Every application belongs to exactly one directory. **Users in a directory share one identity** — the same email is one user record for all apps in that directory.
 - **Application** — A client that authenticates with `client_id` + `client_secret`. Issues JWTs scoped to one app.
-- **User app grant** — Links a user to an application they may sign in to. Created automatically on signup for that app; in shared-directory mode, grants can be added when a user first uses another app.
-- **Scoped application** — For `application_silo` users, `scoped_application_id` pins the user to one app (same email can exist as different users in different apps). For `shared_directory`, this is `NULL` — one identity per email in the directory.
+- **User app grant** — Links a user to an application they may sign in to. Created automatically on signup for that app. Users **cannot log in** to an app without a grant, even if they exist in the same directory.
+- **Organizations** — App-scoped tenants or teams (not created on signup). Use `user_id` for per-user private data in your app.
 
-Fresh installs seed a **default directory** (`slug: default`, policy `application_silo`). New applications are attached to it automatically unless you pick another directory when creating the app.
+### App-level separation
 
-Instance admins can create additional directories from the admin panel (**Directories → New directory**) or by inserting into `tenant.directory` directly during development.
+If two applications must **not** share users (different customers, different products with isolated accounts), put them in **separate directories**. There is no per-directory policy toggle — separation is always at the directory level.
 
-## Typical case 1: Startup / Clerk-like (default)
+If two applications are in the **same directory**, a user who signs up through App A exists as the same identity in that directory. They can only use App B after receiving a `user_app_grant` (via invite, admin provisioning, or another explicit grant path).
 
-**One company, multiple products, isolated users per app.**
+Fresh installs seed a **default directory** (`slug: default`). New applications are attached to it automatically unless you pick another directory when creating the app.
 
-| Setting | Value |
-| --- | --- |
-| Directories | One (`default`) |
-| Policy | `application_silo` |
-| Users | Scoped per application; `user@example.com` in App A ≠ same user in App B |
-| Organizations | Per application (`application_id` set on team orgs) |
-| Grants | One grant per user to the app where they signed up |
+Instance admins can create additional directories from the admin panel (**Directories → New directory**).
 
-This matches most B2B SaaS setups today: each product has its own user table in practice, but you operate one Authstack instance and admin panel.
+## Typical case 1: One company, multiple products (SSO-style)
 
-**Flow:** User signs up via App A → user row with `scoped_application_id = App A` → personal org in App A → JWT includes `app_id` and `directory_id`.
-
-## Typical case 2: Company IdP / enterprise SSO path
-
-**One identity per employee, multiple internal apps.**
+**One directory, several internal apps, shared employee identity.**
 
 | Setting | Value |
 | --- | --- |
-| Directories | One (or one per business unit later) |
-| Policy | `shared_directory` |
-| Users | One row per email in the directory (`scoped_application_id` is NULL) |
-| Organizations | Directory-wide team orgs (`application_id` is NULL) |
-| Grants | Explicit `user_app_grant` per application the user may access |
+| Directories | One (`default` or a named directory) |
+| Users | One row per email in the directory |
+| Access | `user_app_grant` per application |
+| Organizations | App-scoped; created explicitly per application |
 
-Same person signs in once conceptually; access to each app is gated by grants. This is the foundation for a future OAuth/OIDC layer where Authstack acts as the identity provider for your suite.
+**Flow:** User signs up via App A → user row in directory → grant for App A → JWT includes `app_id` and `directory_id` (no org until the user joins or creates one). Admin or invite flow adds a grant before the user can sign in to App B.
 
-**Flow:** User exists in directory → grant added for App B → user can obtain tokens for App B without a separate signup.
+## Typical case 2: Multi-tenant hosting
 
-## Typical case 3: Multi-directory hosting (future)
-
-**One Authstack instance, multiple customers or realms.**
+**One Authstack instance, multiple customers.**
 
 | Setting | Value |
 | --- | --- |
-| Directories | Many (e.g. `acme`, `globex`) |
-| Policy | Per directory (`application_silo` or `shared_directory`) |
-| Applications | Each app linked to one directory |
-| Operators | Instance admins see all; directory admins see scoped operators in their directories; app admins have no access |
+| Directories | One per customer (e.g. `acme`, `globex`) |
+| Applications | Each customer's apps in their directory |
+| Operators | Instance admins see all; directory admins see scoped directories |
 
-Use this when you host Authstack for several companies or environments and need hard identity separation at the directory level. The default install uses a single hidden directory so simple setups never see this complexity.
+Each customer's users are isolated from other customers because they live in different directories.
+
+## Typical case 3: Single app / startup
+
+**Minimal setup — default directory only.**
+
+| Setting | Value |
+| --- | --- |
+| Directories | `default` (hidden in simple setups) |
+| Applications | One or more in `default` |
+
+Remember: multiple unrelated apps in `default` **share the same user pool**. Use separate directories when apps must not share signups.
 
 ## JWT claims
 
@@ -94,19 +89,8 @@ Access tokens include:
 
 Your BFF should treat `app_id` and `directory_id` as part of the security context when calling Authstack or enforcing authorization.
 
-## Choosing a policy
-
-| If you need… | Use |
-| --- | --- |
-| Same email as different users in different apps | `application_silo` (default) |
-| One employee identity across internal apps | `shared_directory` |
-| Minimal concept surface for a new project | Default directory + `application_silo` |
-| Path to central SSO later | `shared_directory` + grants |
-
-Changing policy on a live directory is a significant migration; pick `shared_directory` before you have production users if you know you need IdP-style identity.
-
 ## Related
 
-- [Organizations](/docs/organizations) — personal vs team orgs within an app or directory
+- [Organizations](/docs/organizations) — app-scoped tenants and teams
 - [Authentication](/docs/authentication) — signup, login, tokens
-- [Admin panel](/docs/admin-panel) — applications and operators
+- [Admin panel](/docs/admin-panel) — applications, directories, and operators

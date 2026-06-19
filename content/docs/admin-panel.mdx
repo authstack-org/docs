@@ -31,7 +31,7 @@ Instance admins can manage identity boundaries from **Directories**:
 - List all directories (name, slug, policy, application count, admin count)
 - Open a directory to view its metadata and **directory administrators**
 - **Add directory admin** from a directory's detail page (email + password) — grants `directory_admin` for that directory only
-- **New directory** — set display name, slug, and identity policy (`application_silo` or `shared_directory`)
+- **New directory** — set display name and slug. Users in a directory share identity across all apps in that directory; create a separate directory when apps must not share users.
 - When creating an application, choose which directory it belongs to (defaults to `default`)
 
 Directory admins see only directories they are granted in **Directories**. They can open those directories and add more directory admins (or use **Operators → Add operator**), but cannot create new directories.
@@ -54,14 +54,14 @@ Instance admins can also delete an application from the app detail page. This re
 
 From an application's **Organizations** page you can:
 
-- List all organizations (personal orgs created at signup and team orgs)
-- **Create a team organization** (name + slug) for shared workspaces
+- List all organizations for the application
+- **Create an organization** (name + slug) for tenants or teams
 - Open an organization to view members
-- For **team** orgs only: **Invite by email** — create a shareable invite link (no email is sent automatically)
-- For **team** orgs only: add an existing tenant user as a member (with role)
+- For organizations: **Invite by email** — create a shareable invite link (no email is sent automatically)
+- For organizations: add an existing tenant user as a member (with role)
 - Remove a member from the organization
 
-Personal organizations cannot receive invites. See [Organizations](/docs/organizations) for when to use personal vs team orgs.
+See [Organizations](/docs/organizations) for how app-scoped orgs relate to directories and user identity.
 
 See [Organization invites](/docs/invites) for the full invite flow and API.
 
