@@ -1,0 +1,11 @@
+{
+  "title": "Org Roles",
+  "description": "Organization role definitions.",
+  "pages": [
+    "get-list-organization-roles",
+    "post-create-an-organization-role",
+    "get-get-an-organization-role",
+    "patch-update-an-organization-role",
+    "delete-delete-an-organization-role"
+  ]
+}

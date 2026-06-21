@@ -1,0 +1,10 @@
+{
+  "title": "Permissions",
+  "description": "Application permission catalog.",
+  "pages": [
+    "get-list-application-permissions",
+    "post-create-an-application-permission",
+    "get-get-a-permission-by-id",
+    "delete-delete-an-application-permission"
+  ]
+}

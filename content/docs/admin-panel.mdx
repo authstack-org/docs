@@ -46,19 +46,26 @@ All operators with access to an application can open its detail page to:
 - Open **Users** to list tenant users (with live search)
 - **Invite user** to generate a shareable link (user sets their own password)
 - **Add user** to provision a tenant account directly (name, email, password)
-- Open **Organizations** to browse orgs and manage members
+- Open **Permissions** to define the app's permission catalog
+- Open **Organizations** to browse orgs, manage roles, and manage members
 
 Instance admins can also delete an application from the app detail page. This removes all tenant data for that application.
+
+## Permissions
+
+From an application's **Permissions** page you can define permission keys (e.g. `invoice:write`, `org:invite`) that your app checks in JWT claims or your backend. New permissions are automatically granted to existing **owner** roles in all organizations for that application.
+
+See [Permissions and roles](/docs/permissions).
 
 ## Organizations
 
 From an application's **Organizations** page you can:
 
 - List all organizations for the application
-- **Create an organization** (name + slug) for tenants or teams
-- Open an organization to view members
-- For organizations: **Invite by email** — create a shareable invite link (no email is sent automatically)
-- For organizations: add an existing tenant user as a member (with role)
+- **Create an organization** (name + slug) — seeds default `owner` and `member` roles
+- Open an organization to manage **organization roles** (permission bundles), members, and invites
+- **Invite by email** — create a shareable invite link (no email is sent automatically)
+- Add an existing tenant user as a member (select an organization role)
 - Remove a member from the organization
 
 See [Organizations](/docs/organizations) for how app-scoped orgs relate to directories and user identity.

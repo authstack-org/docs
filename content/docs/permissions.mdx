@@ -1,0 +1,66 @@
+---
+title: Permissions and roles
+description: App permission catalog and per-organization roles in Authstack.
+---
+
+Authstack separates **what actions exist** (app permissions) from **who can do them** (organization roles).
+
+## App permissions
+
+Permissions are defined **per application** by your SaaS product. Each permission has:
+
+- **key** — stable machine identifier (e.g. `invoice:write`, `org:invite`)
+- **name** — display label for admins
+- **description** — optional help text
+
+Manage permissions via:
+
+- **API:** `GET/POST /permissions`, `GET/DELETE /permissions/{id}`
+- **Admin panel:** Application → **Permissions**
+
+When you add a new permission, Authstack automatically grants it to every existing **`owner`** role in that application (across all organizations).
+
+## Organization roles
+
+Each organization has its own role catalog. Roles bundle a subset of the app's permissions.
+
+Default roles are seeded when an organization is created:
+
+| Slug | Name |
+| --- | --- |
+| `owner` | Owner |
+| `member` | Member |
+
+Create custom roles via:
+
+- **API:** `GET/POST /orgs/{org_id}/roles`, `PATCH/DELETE /orgs/{org_id}/roles/{role_id}`
+- **Admin panel:** Organization detail → **Organization roles**
+
+Members and invites reference a role by `org_role_id` or by **role slug** (defaults to `member`).
+
+## JWT claims
+
+When a user has org membership, access tokens include:
+
+```json
+{
+  "sub": "usr_...",
+  "app_id": "app_...",
+  "org_id": "org_...",
+  "role": "member",
+  "permissions": ["org:invite", "invoice:read"]
+}
+```
+
+`permissions` is derived from the member's organization role. Your application can enforce authorization from the JWT without a round trip.
+
+If the user has no org membership, `org_id`, `role`, and `permissions` are omitted.
+
+## Future: Zanzibar-style authz
+
+This model is intentionally compatible with a later **relationship-based** authorization layer (resource tuples, `check` API). Start with org RBAC here; add fine-grained sharing when your product needs it.
+
+## Related
+
+- [Organizations](/docs/organizations) — tenants and membership
+- [Authentication](/docs/authentication) — tokens and org switching

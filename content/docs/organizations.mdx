@@ -24,13 +24,14 @@ Users must already have a `user_app_grant` for the application before they can b
 
 ## Members and roles
 
-- Add members with `POST /orgs/{id}/members` or from the admin organization detail page.
-- Member `role` is a string defined by your app (`owner`, `admin`, `member`, etc.).
-- Organization invites add users to a specific org; see [Organization invites](/docs/invites).
+Organizations define **roles** that bundle [app permissions](/docs/permissions). Default roles `owner` and `member` are created when an organization is created.
+
+- Add members with `POST /orgs/{id}/members` (use `org_role_id` or role slug).
+- Organization invites assign a role at invite time; see [Organization invites](/docs/invites).
 
 ## JWT and org context
 
-Access tokens include `org_id` and `role` **only when** the user has an active organization membership for the issuing application. After signup or login with no org memberships, the token carries user identity (`sub`, `email`, `app_id`, `directory_id`) without org claims.
+Access tokens include `org_id`, `role`, and `permissions` **only when** the user has organization membership for the issuing application. The `permissions` array lists permission keys granted by the member's role.
 
 Use `POST /auth/switch-org` to issue a new token pair for a different organization the user belongs to. Use `POST /auth/refresh` with an optional `org_id` to rotate tokens while selecting org context.
 
@@ -44,6 +45,7 @@ Use `POST /auth/switch-org` to issue a new token pair for a different organizati
 
 ## Related
 
+- [Permissions and roles](/docs/permissions) — app permission catalog and org roles
 - [Directories](/docs/directories) — identity boundaries and app grants
 - [Authentication](/docs/authentication) — signup, login, tokens
 - [Organization invites](/docs/invites) — shareable invite links
