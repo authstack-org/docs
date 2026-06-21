@@ -1,0 +1,200 @@
+---
+title: TypeScript SDK
+description: Use the @authstack/backend-sdk package to call Authstack from Node.js, edge runtimes, and browsers.
+---
+
+Authstack ships a TypeScript SDK at [`@authstack/backend-sdk`](https://www.npmjs.com/package/@authstack/backend-sdk). It wraps the [REST API](/docs/api) with a domain-oriented surface while keeping the generated OpenAPI client available for advanced use.
+
+## Install
+
+```bash
+npm install @authstack/backend-sdk
+```
+
+## Create a client
+
+```ts
+import { createAuthstackClient } from "@authstack/backend-sdk";
+
+export const authstack = createAuthstackClient({
+  baseUrl: process.env.AUTHSTACK_URL!,
+  appId: process.env.AUTHSTACK_APP_ID!,
+  appSecret: process.env.AUTHSTACK_APP_SECRET!,
+});
+```
+
+Every application in Authstack has a **client ID** (`app_…`) and **client secret**. Use them for server-side calls that manage users, organizations, and invites.
+
+## Two API layers
+
+| Layer | When to use | Return shape |
+| --- | --- | --- |
+| **Ergonomic** (`signIn`, `organization`, `permissions`, …) | Normal application code | Throws `AuthstackApiError` by default |
+| **Low-level** (`api.*`) | Custom tooling, exact OpenAPI control | Always `{ data, error }` |
+
+```ts
+// Ergonomic — flat arguments, throws on error
+const org = await authstack.organization.create({ name: "Acme", slug: "acme" });
+
+// Low-level — mirrors HTTP
+const { data, error } = await authstack.api.orgs.create({
+  body: { name: "Acme", slug: "acme" },
+});
+```
+
+Set `throwOnError: false` on the client or pass `{ throwOnError: false }` on a single call to use the `{ data, error }` pattern with ergonomic methods.
+
+## Sessions and cookies
+
+Authstack issues **JWT access tokens** and **refresh tokens**. The SDK does **not** set browser cookies for you — your app owns the session boundary.
+
+Recommended pattern for a web app:
+
+1. **Sign-in route** (your backend) calls `authstack.signIn.email(...)`.
+2. Store `accessToken` and `refreshToken` in an **httpOnly, Secure, SameSite** cookie (or your session store).
+3. On later requests, read the cookie and call `authstack.useSession({ accessToken, refreshToken, tokenType: "Bearer" })`.
+4. On sign-out, call `authstack.signOut({ refreshToken })` then `authstack.clearSession()` and delete your cookie.
+
+```ts
+// After login (in your API route)
+const tokens = await authstack.signIn.email({ email, password });
+// → persist tokens.access_token and tokens.refresh_token to your cookie
+
+// On authenticated requests
+authstack.useSession({
+  accessToken: cookie.accessToken,
+  refreshToken: cookie.refreshToken,
+  tokenType: "Bearer",
+});
+
+const memberships = await authstack.me.organizations();
+```
+
+`autoUseSession` (default `true`) stores tokens on the SDK client after `signIn`, `session.refresh`, and `session.switchOrg` so follow-up calls in the same process use bearer auth automatically.
+
+A dedicated cookie/session helper and React bindings may be added in a future package.
+
+## Authentication flows
+
+### Sign up and sign in
+
+```ts
+const user = await authstack.signUp.email({
+  name: "Ada Lovelace",
+  email: "ada@example.com",
+  password: "secure-password",
+});
+
+const tokens = await authstack.signIn.email({
+  email: "ada@example.com",
+  password: "secure-password",
+});
+```
+
+### Switch organization
+
+When a user belongs to multiple orgs, issue a new token pair scoped to the active org:
+
+```ts
+const tokens = await authstack.session.switchOrg({ orgId: "org_..." });
+```
+
+The access token includes `org_id`, `role`, and `permissions` when the user has org membership. See [Authentication](/docs/authentication).
+
+### Refresh and sign out
+
+```ts
+const refreshed = await authstack.session.refresh({
+  refreshToken: session.refreshToken,
+});
+
+await authstack.signOut({ refreshToken: session.refreshToken });
+authstack.clearSession();
+```
+
+## Organizations
+
+Org-scoped APIs live under `organization`:
+
+```ts
+const org = await authstack.organization.create({ name: "Acme", slug: "acme" });
+
+const members = await authstack.organization.members.list(org.id);
+await authstack.organization.members.add(org.id, {
+  userId: "usr_...",
+  roleSlug: "member",
+});
+
+const invite = await authstack.organization.invites.create(org.id, {
+  email: "colleague@example.com",
+  roleSlug: "member",
+});
+// share invite.invite_url
+
+const roles = await authstack.organization.roles.list(org.id);
+await authstack.organization.roles.create(org.id, {
+  slug: "billing-admin",
+  name: "Billing Admin",
+  permissionIds: ["perm_..."],
+});
+```
+
+App-wide permission keys are managed separately:
+
+```ts
+await authstack.permissions.create({
+  key: "org:invite",
+  name: "Invite members",
+});
+```
+
+See [Permissions and roles](/docs/permissions).
+
+## Error handling
+
+```ts
+import { AuthstackApiError, isAuthstackApiError } from "@authstack/backend-sdk";
+
+try {
+  await authstack.signIn.email({ email, password });
+} catch (error) {
+  if (isAuthstackApiError(error)) {
+    console.error(error.status, error.message);
+  }
+}
+```
+
+## Types
+
+Domain types are exported from the package root:
+
+```ts
+import type {
+  Organization,
+  Member,
+  AppPermission,
+  OrgRoleDetail,
+  TokenResponse,
+  AuthstackSession,
+} from "@authstack/backend-sdk";
+```
+
+Generated OpenAPI types (`InvitesCreateData`, etc.) are also exported for low-level `api` usage.
+
+## Admin API
+
+Platform operators can pass `adminCookie` (the `admin_token` cookie value after `/admin/login`) to call admin endpoints via `authstack.api.admin.*`. These are intended for automation, not end-user flows.
+
+## Keeping the SDK in sync
+
+The SDK is generated from Authstack's OpenAPI spec. After backend API changes:
+
+```bash
+pnpm --filter @authstack/backend-sdk run generate
+```
+
+## Related
+
+- [Authentication](/docs/authentication) — JWT claims and token lifecycle
+- [Organizations](/docs/organizations) — tenants and membership
+- [REST API](/docs/api) — full HTTP reference

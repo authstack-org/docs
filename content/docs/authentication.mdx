@@ -78,3 +78,9 @@ GET /.well-known/jwks.json
 ```
 
 Use the JWKS endpoint to verify Authstack-issued JWTs locally without calling Authstack on every request.
+
+## TypeScript SDK
+
+For application code, prefer the [`@authstack/backend-sdk`](/docs/typescript-sdk) package. It provides `signIn.email`, `organization.*`, session helpers (`useSession`, `getSession`), and throws typed `AuthstackApiError` on failure.
+
+Your app is still responsible for persisting tokens in cookies or your session store — see [TypeScript SDK — Sessions and cookies](/docs/typescript-sdk#sessions-and-cookies).
